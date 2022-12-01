@@ -1,66 +1,17 @@
 #! /usr/bin/env node
 import fs from "fs";
 
-function fromFileToArray(filePath: string): Array<Array<number>> {
-  const array: Array<string> = fs.readFileSync(filePath).toString().split("\n");
-  let groupArray: Array<Array<number>> = [];
-  let subArray: Array<number> = [];
+const input: Array<string> = fs
+  .readFileSync("input.txt")
+  .toString()
+  .split("\n\n");
 
-  array.forEach((entry) => {
-    if (entry !== "") {
-      subArray.push(parseInt(entry));
-    }
-    if (entry === "") {
-      groupArray.push(subArray);
-      subArray = [];
-    }
-  });
+const sum = (a: number, b: number): number => a + b;
+const array: Array<Array<number>> = input.map(entry => entry.split('\n').map(Number));
+const totalEachElf: Array<number> = array.map(elf => elf.reduce(sum, 0));
+const top3: number = totalEachElf.sort((a, b) => b - a).slice(0, 3).reduce(sum, 0);
 
-  return groupArray;
-}
-
-function getBiggestNumberSum(array: Array<Array<number>>): number {
-  let bigTotal = 0;
-  array.forEach((subArray) => {
-    const tempTotal = subArray.reduce((accumulator, entry) => {
-      return accumulator + entry;
-    }, 0);
-    if (tempTotal >= bigTotal) {
-      bigTotal = tempTotal;
-    }
-  });
-
-  return bigTotal;
-}
-
-function getTop3(array: Array<Array<number>>) {
-  let allsum: Array<number> = [];
-  array.forEach((subArray) => {
-    const tempTotal = subArray.reduce((accumulator, entry) => {
-      return accumulator + entry;
-    }, 0);
-    allsum.push(tempTotal);
-  });
-
-  return allsum
-    .sort(function (a, b) {
-      return b - a;
-    })
-    .slice(0, 3)
-    .reduce((accumulator, entry) => {
-      return accumulator + entry;
-    }, 0);
-}
-
-function solveDayOne() { 
-  const elvesList = fromFileToArray("input.txt");
-  const biggetsElf = getBiggestNumberSum(elvesList);
-  const top3 = getTop3(elvesList);
-
-  console.log(`
-    - Greatest calorie count: ${biggetsElf}
-    - Top 3: ${top3}
-    `);
-}
-
-solveDayOne()
+console.log(`
+1. ${Math.max(...totalEachElf)}
+2. ${top3}`
+)
