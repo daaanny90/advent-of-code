@@ -1,0 +1,14 @@
+{
+  "name": "aoc-2022",
+  "version": "1.0.0",
+  "description": "Advent of code 2022",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Danny Spina",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.11.10"
+  }
+}
