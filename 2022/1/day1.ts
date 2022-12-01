@@ -2,7 +2,7 @@
 import fs from "fs";
 
 const input: Array<string> = fs
-  .readFileSync("input.txt")
+  .readFileSync("i.txt")
   .toString()
   .split("\n\n");
 
