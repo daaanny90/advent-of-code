@@ -1,1 +1,1 @@
-import f from "fs";const s=(a:number,b:number)=>a+b;const a=f.readFileSync("i.txt").toString().split("\n\n").map((e)=>e.split("\n").map(Number)).map((e)=>e.reduce(s,0));console.log(`1. ${Math.max(...a)} 2. ${a.sort((a,b)=>b-a).slice(0,3).reduce(s,0)}`);
+import f from "fs";let s=(a:number,b:number)=>a+b;let a=f.readFileSync("i.txt").toString().split("\n\n").map(e=>e.split("\n").map(Number)).map(e=>e.reduce(s,0));console.log(`1. ${Math.max(...a)} 2. ${a.sort((a,b)=>b-a).slice(0,3).reduce(s,0)}`)
