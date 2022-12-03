@@ -12,3 +12,10 @@ npx ts-node <script>.ts
     <li>209481</li>
   </ol>
 </details>
+<details>
+  <summary>Day 2</summary>
+  <ol>
+    <li>10046</li>
+    <li>12411</li>
+  </ol>
+</details>
