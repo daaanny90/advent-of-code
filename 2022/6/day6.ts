@@ -16,7 +16,9 @@ for (let i = 0; i < stringArray.length; i++) {
     counter++;
     i = counter;
   }
+
   marker.push(stringArray[i]);
+  
   if (!part1Solved) {
     if (marker.length === 4) {
       part1 = i + 1;
