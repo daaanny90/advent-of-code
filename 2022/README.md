@@ -36,8 +36,8 @@ npx ts-node <script>.ts
 <details>
   <summary>Day 5</summary>
   <ol>
-    <li>433</li>
-    <li>852</li>
+    <li>LJSVLTWQM</li>
+    <li>BRQWDBBJM</li>
   </ol>
 </details>
 <details>
