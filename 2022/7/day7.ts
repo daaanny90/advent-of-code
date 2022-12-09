@@ -1,163 +1,144 @@
-#! /usr/bin/env node
 import fs from "fs";
-type Directory = {
-  index: number;
+type Command = {
+  type: "command";
+  command: "cd" | "ls";
+  arg?: string;
+};
+
+type File = {
+  type: "file";
+  size: number;
   name: string;
-  files: Array<string>;
-  totalSize: number;
-  subFolders: Array<string>;
 };
 
-const input: Array<string> = fs.readFileSync("input.txt").toString().split("\n");
-
-let counter = 0;
-const directories: Array<Directory> = [];
-
-const isCdCommand = (entry: string): RegExpMatchArray | null => {
-  return entry.match(/[$cd ]{5}/g);
+type Dir = {
+  type: "dir";
+  size: null;
+  name: string;
 };
 
-const isDirectory = (entry: string): RegExpMatchArray | null => {
-  return entry.match(/[dir ]{4}/g);
+type Entries = (Command | File | Dir)[];
+
+type Disk = {
+  [key: string]: Disk | number;
 };
 
-const prefixName = (dir: string, index: number, prefix: string) => {
-  const dirName = isDirectory(dir);
-  if (dirName) {
-    input[index] = `dir ${prefix + dir.replace(dirName[0], "")}`;
-  }
-}
+const input: string = fs
+  .readFileSync("input.txt")
+  .toString()
+  
+const parseCommands = (entries: Entries) => {
+  const disk: Disk = {};
+  const path: string[] = [];
 
-const prefixCommand = (command: string, index: number, prefix: string) => {
-  const commandName = isCdCommand(command)
-  if (commandName) {
-    input[index] = `$ cd ${prefix + command.replace(commandName[0], "")}`
-  }
-}
+  const createFileOrDir = (name: string, val: number | {} = {}) => {
+    // const p = [...path];
+    let cwd = disk;
 
-const isFile = (entry: string): RegExpMatchArray | null => {
-  return entry.match(/([\d+])+/);
-};
+    path.forEach((step) => {
+      if (cwd[step] === undefined) {
+        cwd[step] = {} as Disk;
+      }
+      cwd = cwd[step] as Disk;
+    });
 
-let currentDir = "";
-let dirList: Array<string> = [];
-let levelIndex = -1;
-let i = 0;
-// prepare input with prefixes to avoid duplicated directories
-input.forEach((entry) => {
-  if (isCdCommand(entry) && entry !== "$ cd ..") {
-    const commandCd = isCdCommand(entry);
-    if (!commandCd) {
-      throw new Error(`${entry} is not a cd command.`);
-    }
-    // save current position in array
-    currentDir = entry.replace(commandCd[0], "");
-    dirList.push(currentDir);
-    
-    // increase index to match the current position
-    levelIndex++;
+    cwd[name] = val;
+  };
 
-    // on root level is useless put prefixes
-    if (levelIndex > 1) {
-
-      // prefix the command to match the prefixed folder name
-      prefixCommand(entry, i, `${dirList[levelIndex - 1]}_`);
-    }
-  }
-
-  if (isDirectory(entry)) {
-    // do not apply prefixes on root level
-    if (levelIndex !== 0) {
-      prefixName(entry, i, `${dirList[levelIndex]}_`);
-    }
-  }
-
-  if (entry === "$ cd ..") {
-    levelIndex--
-  }
-  i++
-});
-
-// build list of directories
-input.forEach((entry) => {
-  // if command is cd then parse the directory
-  if (isCdCommand(entry) && entry !== "$ cd ..") {
-    // save current directory
-    const commandCd = isCdCommand(entry);
-    if (!commandCd) {
-      throw new Error(`${entry} is not a cd command.`);
-    }
-
-    let dir: Directory = {
-      index: counter,
-      name: "",
-      files: [],
-      totalSize: 0,
-      subFolders: [],
-    };
-
-    dir.name = entry.replace(commandCd[0], "");
-
-    // calculate total size of current directory based on the files inside
-    for (let i = counter + 2; i < input.length; i++) {
-      if (isFile(input[i])) {
-        const fileSize = isFile(input[i]);
-        if (fileSize) {
-          dir.totalSize += parseInt(fileSize[0]);
+  for (const entry of entries) {
+    switch (entry.type) {
+      case "command": {
+        switch (entry.command) {
+          case "ls":
+            break;
+          case "cd":
+            if (entry.arg === "..") {
+              path.pop();
+            } else if (entry.arg === "/") {
+              path.length = 0;
+            } else {
+              path.push(entry.arg as string);
+            }
+            break;
         }
-        dir.files.push(input[i]);
+        break;
       }
 
-      // populate the list of subfolders inside current directory
-      if (isDirectory(input[i])) {
-        const dirName = isDirectory(input[i]);
-        if (dirName) {
-          dir.subFolders.push(input[i].replace(dirName[0], ""));
-        }
+      case "dir": {
+        createFileOrDir(entry.name);
+        break;
       }
 
-      // if switching to anoher directory of the end is reached, break the loop and go on
-      if (isCdCommand(input[i]) || input[i] === input[input.length - 1]) {
-        if (input[i] === "$ cd ..") {
-          levelIndex--;
-        }
-        directories.push(dir);
+      case "file": {
+        createFileOrDir(entry.name, entry.size);
         break;
       }
     }
   }
-  counter++;
-});
 
-const calcTotalSize = (dir: Directory) => {
- dir.subFolders.forEach((sub) => {
-    directories.forEach((entry) => {
-      if (entry.name === sub) {
-        dir.totalSize += entry.totalSize;
-        if (entry.subFolders.length > 0) {
-          calcTotalSize(entry)
-        }
-        return;
-      }
-    }); 
-  })
+  return disk;
 };
 
-const root = directories[0]  
-calcTotalSize(root)
 
-let part1 = 0;
-directories.forEach((dir) => {
-  if (dir.totalSize <= 100000) {
-    part1 += dir.totalSize;
-  }
-});
+const parseInput = (input: string) => {
+  const entries = input.split("\n").map((line) => {
+    if (line.startsWith("$")) {
+      const [command, arg] = line.split(" ").slice(1);
+      return { type: "command", command, arg } as Command;
+    }
 
-console.log(directories);
-console.log(input)
+    const [dirOrSize, name] = line.split(" ");
 
-if (part1 === 1314546 || part1 === 1314661 || part1 === 1316024) {
-  console.log(`${part1} is wrong`);
-} else {
-  console.log(`1. ${part1}`);
-}
+    if (dirOrSize === "dir") {
+      return {
+        type: "dir",
+        name,
+      } as Dir;
+    }
+
+    return {
+      type: "file",
+      size: Number(dirOrSize),
+      name,
+    } as File;
+  });
+
+  return parseCommands(entries);
+};
+
+const getDirSizes = (inputFile: string) => {
+  const input = parseInput(inputFile);
+  const dirSizes: number[] = [];
+
+  const recur = (disk: Disk) => {
+    let size = 0;
+
+    for (const [_, val] of Object.entries(disk)) {
+      size += typeof val === "number" ? val : recur(val);
+    }
+
+    dirSizes.push(size);
+    return size;
+  };
+
+  recur(input);
+  return dirSizes;
+};
+
+const getBiggestDir = (input: string): number => {
+  return getDirSizes(input)
+  .filter((size) => size <= 100000)
+  .reduce((a, b) => a + b, 0);
+};
+let part1 = getBiggestDir(input);
+
+const minDirSize = (input: string): number | undefined => {
+  const dirSizes = getDirSizes(input).sort((a, b) => a - b);
+  const free = 70_000_000 - (dirSizes.at(-1) ?? 0);
+  const required = 30_000_000 - free;
+
+  return dirSizes.find((size) => size >= required);
+};
+let part2 = minDirSize(input)
+
+console.log(`1. ${part1} 2. ${part2}`)
