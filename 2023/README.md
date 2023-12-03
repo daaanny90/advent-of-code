@@ -15,3 +15,10 @@ cd <folder> && go run .
     <li>56108</li>
   </ol>
 </details>
+<details>
+  <summary>Day 2</summary>
+  <ol>
+    <li>1853</li>
+    <li>5617270608</li>
+  </ol>
+</details>
