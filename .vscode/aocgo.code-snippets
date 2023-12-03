@@ -1,0 +1,52 @@
+{
+  // Place your advent-of-code workspace snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and
+  // description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope
+  // is left empty or omitted, the snippet gets applied to all languages. The prefix is what is
+  // used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+  // $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders.
+  // Placeholders with the same ids are connected.
+  // Example:
+  "Initialize Go AoC": {
+    "scope": "go",
+    "prefix": "aocgo",
+    "body": [
+      "package main",
+      "",
+      "import (",
+      "	\"bufio\"",
+      "	\"fmt\"",
+      "	\"os\"",
+      ")",
+      "",
+      "func readInput() ([]string, error) {",
+      "	file, err := os.Open(\"input.txt\")",
+      "",
+      "	if err != nil {",
+      "		return nil, err",
+      "	}",
+      "	defer file.Close()",
+      "",
+      "	var lines []string",
+      "	scanner := bufio.NewScanner(file)",
+      "",
+      "	for scanner.Scan() {",
+      "		lines = append(lines, scanner.Text())",
+      "	}",
+      "",
+      "	return lines, nil",
+      "}",
+      "",
+      "func main() {",
+      "	input, err := readInput()",
+      "",
+      "	if err != nil {",
+      "		fmt.Println(err)",
+      "		return",
+      "	}",
+      "",
+      "	fmt.Println(input)",
+      "}"
+    ],
+    "description": "Initialize basic input reading for AoC in Go"
+  }
+}
